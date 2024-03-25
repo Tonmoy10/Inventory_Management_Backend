@@ -58,4 +58,13 @@ router.post('/edit_employee/:id', (req, res) => {
     })
 })
 
+router.delete('/delete_employee/:id', (req, res) => {
+    const id = req.params.id
+    const sql = 'DELETE from employees where id=?';
+    con.query(sql, [id], (err, result) => {
+        if(err) return res.json({Status: false, Error: "Query Error!"})
+        return res.json({Status: true})
+    })
+})
+
 export {router as loginRouter}
