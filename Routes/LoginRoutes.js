@@ -67,4 +67,34 @@ router.delete('/delete_employee/:id', (req, res) => {
     })
 })
 
+router.get('/item', (req, res) => {
+    const sql = 'SELECT * from items'
+    con.query(sql, (err, result) => {
+        if(err) return res.json({Status: false, Error: "Query Eror!!"})
+        return res.json({Status: true, Result: result})
+    })
+})
+
+router.post('/add_item', (req, res) => {
+    const sql = 'INSERT into items (item_name, stock, unit) values (?)'
+    const values = [
+        req.body.item_name,
+        req.body.stock,
+        req.body.unit
+    ]
+    con.query(sql, [values], (err, result) => {
+        if(err) return res.json({Status: false, Error: "Query Error!"})
+        return res.json({Status: true})
+    })
+})
+
+router.delete('/delete_item/:id', (req, res) => {
+    const id = req.params.id
+    const sql = 'DELETE from items where item_id=?'
+    con.query(sql, [id], (err, result) => {
+        if(err) return res.json({Status: false, Error: err.message})
+        return res.json({Status: true})
+    })
+})
+
 export {router as loginRouter}
