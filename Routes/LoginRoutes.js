@@ -5,14 +5,14 @@ import con from "../utils/db.js"
 const router = express.Router()
 
 router.post('/login', (req, res) => {
-    if(req.body.email == "nawabikacchi1@gmail.com" && req.body.password == "Admins123") {
-        const token = jwt.sign({action: "logged"}, 
-        "nawabi_kacchi_online", {expiresIn: "1d"})
+    if (req.body.email == "nawabikacchi1@gmail.com" && req.body.password == "Admins123") {
+        const token = jwt.sign({ action: "logged" },
+            "nawabi_kacchi_online", { expiresIn: "1d" })
         res.cookie("token", token)
-        return res.json({loginStatus: true})
+        return res.json({ loginStatus: true })
     }
     else {
-        return res.json({loginStatus: false, Error: "Invalid email or password!"})
+        return res.json({ loginStatus: false, Error: "Invalid email or password!" })
     }
 })
 
@@ -27,34 +27,34 @@ router.post('/add_employee', (req, res) => {
         req.body.join_date,
     ]
     con.query(sql, [values], (err, result) => {
-        if(err) return res.json({Status: false, Error: "Query Error!"})
-        return res.json({Status: true})
+        if (err) return res.json({ Status: false, Error: "Query Error!" })
+        return res.json({ Status: true })
     })
 })
 
 router.get('/employee', (req, res) => {
     const sql = 'SELECT * FROM employees';
     con.query(sql, (err, result) => {
-        if(err) return res.json({Status: false, Error: "Query Error!"})
-        return res.json({Status: true, Result: result})
+        if (err) return res.json({ Status: false, Error: "Query Error!" })
+        return res.json({ Status: true, Result: result })
     })
 })
 
 router.get('/get_employee/:id', (req, res) => {
     const id = req.params.id
     const sql = 'SELECT * FROM employees where id= ?';
-    con.query(sql, [id] , (err, result) => {
-        if(err) return res.json({Status: false, Error: "Query Error!"})
-        return res.json({result})
+    con.query(sql, [id], (err, result) => {
+        if (err) return res.json({ Status: false, Error: "Query Error!" })
+        return res.json({ result })
     })
 })
 
 router.post('/edit_employee/:id', (req, res) => {
     const id = req.params.id
     const sql = 'UPDATE employees set position=?, salary=?, phone=?, address=? where id=? ';
-    con.query(sql,[req.body.position, req.body.salary, req.body.phone, req.body.address, id], (err, result) => {
-        if(err) return res.json({Status: false, Error: "Query Error!"})
-        return res.json({Status: true, Result: result})
+    con.query(sql, [req.body.position, req.body.salary, req.body.phone, req.body.address, id], (err, result) => {
+        if (err) return res.json({ Status: false, Error: "Query Error!" })
+        return res.json({ Status: true, Result: result })
     })
 })
 
@@ -62,16 +62,16 @@ router.delete('/delete_employee/:id', (req, res) => {
     const id = req.params.id
     const sql = 'DELETE from employees where id=?';
     con.query(sql, [id], (err, result) => {
-        if(err) return res.json({Status: false, Error: "Query Error!"})
-        return res.json({Status: true})
+        if (err) return res.json({ Status: false, Error: "Query Error!" })
+        return res.json({ Status: true })
     })
 })
 
 router.get('/item', (req, res) => {
     const sql = 'SELECT * from items'
     con.query(sql, (err, result) => {
-        if(err) return res.json({Status: false, Error: "Query Eror!!"})
-        return res.json({Status: true, Result: result})
+        if (err) return res.json({ Status: false, Error: "Query Eror!!" })
+        return res.json({ Status: true, Result: result })
     })
 })
 
@@ -83,8 +83,8 @@ router.post('/add_item', (req, res) => {
         req.body.unit
     ]
     con.query(sql, [values], (err, result) => {
-        if(err) return res.json({Status: false, Error: "Query Error!"})
-        return res.json({Status: true})
+        if (err) return res.json({ Status: false, Error: "Query Error!" })
+        return res.json({ Status: true })
     })
 })
 
@@ -92,9 +92,44 @@ router.delete('/delete_item/:id', (req, res) => {
     const id = req.params.id
     const sql = 'DELETE from items where item_id=?'
     con.query(sql, [id], (err, result) => {
-        if(err) return res.json({Status: false, Error: err.message})
-        return res.json({Status: true})
+        if (err) return res.json({ Status: false, Error: err.message })
+        return res.json({ Status: true })
     })
 })
 
-export {router as loginRouter}
+router.get('/get_item/:id', (req, res) => {
+    const id = req.params.id
+    const sql = 'SELECT * FROM items where item_id= ?';
+    con.query(sql, [id], (err, result) => {
+        if (err) return res.json({ Status: false, Error: "Query Error!" })
+        return res.json({ result })
+    })
+})
+
+router.post('/update_item/:id', (req, res) => {
+    const id = parseInt(req.params.id)
+    const stock = parseFloat(req.body.stock)
+    const quantity = parseFloat(req.body.quantity)
+    const new_stock = stock + quantity
+    if (new_stock < 0) {
+        return res.json({ Status: false, Error: "Not enough item in stock!" })
+    }
+    // const date = new Date()
+    const sql = "INSERT INTO iteminfos (item_id, quantity) VALUES (?)";
+    const values = [
+        id,
+        quantity
+    ]
+    con.query(sql, [values], (err, result) => {
+        if (err) return res.json({ Status: false, Error: err.message })
+    })
+    const sql2 = 'Update items set stock=? where item_id=?'
+    con.query(sql2, [new_stock, id], (err, result) => {
+        if (err) return res.json({ Status: false, Error: err.message })
+        return res.json({ Status: true })
+    })
+
+
+})
+
+export { router as loginRouter }
