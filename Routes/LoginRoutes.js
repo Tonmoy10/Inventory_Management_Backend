@@ -128,8 +128,44 @@ router.post('/update_item/:id', (req, res) => {
         if (err) return res.json({ Status: false, Error: err.message })
         return res.json({ Status: true })
     })
+})
 
+router.post('/item_record', (req, res) => {
+    console.log(req.body.date)
+    const sql = 'SELECT iteminfos.date, items.item_name, iteminfos.quantity, items.unit from iteminfos inner join items on items.item_id=iteminfos.item_id where iteminfos.date = ?';
+    con.query(sql, [req.body.date], (err, result) => {
+        if (err) return res.json({Status: false, Error: err.message})
+        return res.json({Status: true, Result: result})
+    })
+})
 
+router.get('/item_count', (req, res) => {
+    const sql = "select count(item_id) as item from items";
+    con.query(sql, (err, result) => {
+        if(err) return res.json({Status: false, Error: "Query Error"+err})
+        return res.json({Status: true, Result: result})
+    })
+})
+
+router.get('/employee_count', (req, res) => {
+    const sql = "select count(id) as employee from employees";
+    con.query(sql, (err, result) => {
+        if(err) return res.json({Status: false, Error: "Query Error"+err})
+        return res.json({Status: true, Result: result})
+    })
+})
+
+router.get('/salary_count', (req, res) => {
+    const sql = "select sum(salary) as salary from employees";
+    con.query(sql, (err, result) => {
+        if(err) return res.json({Status: false, Error: "Query Error"+err})
+        return res.json({Status: true, Result: result})
+    })
+})
+
+router.get('/logout', (req, res) => {
+    res.clearCookie('token')
+    return res.json({Status: true})
 })
 
 export { router as loginRouter }
