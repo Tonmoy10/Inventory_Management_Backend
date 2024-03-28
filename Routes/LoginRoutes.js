@@ -187,7 +187,7 @@ router.post('/add_sale', (req, res) => {
     const sql = "INSERT INTO sales (sale) VALUES (?)"
     con.query(sql, [req.body.sale], (err, result) => {
         if (err) return res.json({Status: false, Error: err})
-        return result
+        return res.json({Status: true})
     })
 })
 
