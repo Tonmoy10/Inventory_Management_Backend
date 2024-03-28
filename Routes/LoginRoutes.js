@@ -5,8 +5,11 @@ import con from "../utils/db.js"
 const router = express.Router()
 
 router.post('/login', (req, res) => {
+    if(req.body.email == "" || req.body.password == ""){
+        return res.json({Status: false, Error: "Please fill out all the fields!"})
+    }
     if (req.body.email == "nawabikacchi1@gmail.com" && req.body.password == "Admins123") {
-        const token = jwt.sign({ action: "logged" },
+        const token = jwt.sign({ email: "nawabikacchi1@gmail.com" },
             "nawabi_kacchi_online", { expiresIn: "1d" })
         res.cookie("token", token)
         return res.json({ loginStatus: true })
@@ -17,6 +20,9 @@ router.post('/login', (req, res) => {
 })
 
 router.post('/add_employee', (req, res) => {
+    if(req.body.name == "" || req.body.position == "" || req.body.salary == "" || req.body.phone == "" || req.body.address == "" || req.body.join_date == ""){
+        return res.json({Status: false, Error: "Please fill out all the fields!"})
+    }
     const sql = 'INSERT INTO employees (name, position, salary, phone, address, join_date) VALUES (?)';
     const values = [
         req.body.name,
@@ -50,6 +56,9 @@ router.get('/get_employee/:id', (req, res) => {
 })
 
 router.post('/edit_employee/:id', (req, res) => {
+    if(req.body.position == "" || req.body.salary == "" || req.body.phone == "" || req.body.address == ""){
+        return res.json({Status: false, Error: "Please fill out all the fields!"})
+    }
     const id = req.params.id
     const sql = 'UPDATE employees set position=?, salary=?, phone=?, address=? where id=? ';
     con.query(sql, [req.body.position, req.body.salary, req.body.phone, req.body.address, id], (err, result) => {
@@ -76,6 +85,9 @@ router.get('/item', (req, res) => {
 })
 
 router.post('/add_item', (req, res) => {
+    if(req.body.item_name == "" || req.body.stock == "" || req.body.unit == ""){
+        return res.json({Status: false, Error: "Please fill out all the fields!"})
+    }
     const sql = 'INSERT into items (item_name, stock, unit) values (?)'
     const values = [
         req.body.item_name,
@@ -107,6 +119,9 @@ router.get('/get_item/:id', (req, res) => {
 })
 
 router.post('/update_item/:id', (req, res) => {
+    if(req.body.quantity == ""){
+        return res.json({Status: false, Error: "Please enter Quantity!"})
+    }
     const id = parseInt(req.params.id)
     const stock = parseFloat(req.body.stock)
     const quantity = parseFloat(req.body.quantity)
@@ -134,38 +149,38 @@ router.post('/item_record', (req, res) => {
     console.log(req.body.date)
     const sql = 'SELECT iteminfos.date, items.item_name, iteminfos.quantity, items.unit from iteminfos inner join items on items.item_id=iteminfos.item_id where iteminfos.date = ?';
     con.query(sql, [req.body.date], (err, result) => {
-        if (err) return res.json({Status: false, Error: err.message})
-        return res.json({Status: true, Result: result})
+        if (err) return res.json({ Status: false, Error: err.message })
+        return res.json({ Status: true, Result: result })
     })
 })
 
 router.get('/item_count', (req, res) => {
     const sql = "select count(item_id) as item from items";
     con.query(sql, (err, result) => {
-        if(err) return res.json({Status: false, Error: "Query Error"+err})
-        return res.json({Status: true, Result: result})
+        if (err) return res.json({ Status: false, Error: "Query Error" + err })
+        return res.json({ Status: true, Result: result })
     })
 })
 
 router.get('/employee_count', (req, res) => {
     const sql = "select count(id) as employee from employees";
     con.query(sql, (err, result) => {
-        if(err) return res.json({Status: false, Error: "Query Error"+err})
-        return res.json({Status: true, Result: result})
+        if (err) return res.json({ Status: false, Error: "Query Error" + err })
+        return res.json({ Status: true, Result: result })
     })
 })
 
 router.get('/salary_count', (req, res) => {
     const sql = "select sum(salary) as salary from employees";
     con.query(sql, (err, result) => {
-        if(err) return res.json({Status: false, Error: "Query Error"+err})
-        return res.json({Status: true, Result: result})
+        if (err) return res.json({ Status: false, Error: "Query Error" + err })
+        return res.json({ Status: true, Result: result })
     })
 })
 
 router.get('/logout', (req, res) => {
     res.clearCookie('token')
-    return res.json({Status: true})
+    return res.json({ Status: true })
 })
 
 export { router as loginRouter }
