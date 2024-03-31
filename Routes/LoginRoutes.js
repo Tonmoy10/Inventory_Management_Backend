@@ -23,12 +23,13 @@ router.post('/add_employee', (req, res) => {
     if(req.body.name == "" || req.body.position == "" || req.body.salary == "" || req.body.phone == "" || req.body.address == "" || req.body.join_date == ""){
         return res.json({Status: false, Error: "Please fill out all the fields!"})
     }
-    const sql = 'INSERT INTO employees (name, position, salary, phone, address, join_date) VALUES (?)';
+    const sql = 'INSERT INTO employees (name, position, salary, phone, nid, address, join_date) VALUES (?)';
     const values = [
         req.body.name,
         req.body.position,
         req.body.salary,
         req.body.phone,
+        req.body.nid,
         req.body.address,
         req.body.join_date,
     ]
@@ -60,8 +61,8 @@ router.post('/edit_employee/:id', (req, res) => {
         return res.json({Status: false, Error: "Please fill out all the fields!"})
     }
     const id = req.params.id
-    const sql = 'UPDATE employees set position=?, salary=?, phone=?, address=? where id=? ';
-    con.query(sql, [req.body.position, req.body.salary, req.body.phone, req.body.address, id], (err, result) => {
+    const sql = 'UPDATE employees set position=?, salary=?, phone=?, address=?, status=? where id=? ';
+    con.query(sql, [req.body.position, req.body.salary, req.body.phone, req.body.address, req.body.status, id], (err, result) => {
         if (err) return res.json({ Status: false, Error: "Query Error!" })
         return res.json({ Status: true, Result: result })
     })
@@ -130,10 +131,12 @@ router.post('/update_item/:id', (req, res) => {
         return res.json({ Status: false, Error: "Not enough item in stock!" })
     }
     // const date = new Date()
-    const sql = "INSERT INTO iteminfos (item_id, quantity) VALUES (?)";
+    const sql = "INSERT INTO iteminfos (item_id, quantity, previous, current) VALUES (?)";
     const values = [
         id,
-        quantity
+        quantity,
+        stock,
+        new_stock
     ]
     con.query(sql, [values], (err, result) => {
         if (err) return res.json({ Status: false, Error: err.message })
@@ -147,7 +150,7 @@ router.post('/update_item/:id', (req, res) => {
 
 router.post('/item_record', (req, res) => {
     console.log(req.body.date)
-    const sql = 'SELECT iteminfos.date, items.item_name, iteminfos.quantity, items.unit from iteminfos inner join items on items.item_id=iteminfos.item_id where iteminfos.date = ?';
+    const sql = 'SELECT iteminfos.date, items.item_name, iteminfos.quantity, items.unit, iteminfos.previous, iteminfos.current from iteminfos inner join items on items.item_id=iteminfos.item_id where iteminfos.date = ?';
     con.query(sql, [req.body.date], (err, result) => {
         if (err) return res.json({ Status: false, Error: err.message })
         return res.json({ Status: true, Result: result })
@@ -184,9 +187,16 @@ router.get('/logout', (req, res) => {
 })
 
 router.post('/add_sale', (req, res) => {
-    const sql = "INSERT INTO sales (sale) VALUES (?)"
-    con.query(sql, [req.body.sale], (err, result) => {
-        if (err) return res.json({Status: false, Error: err})
+    if(req.body.sale == "" || req.body.expense == "") {
+        return res.json({Status: false, Error: "Please input both the fields!"})
+    }
+    const sql = "INSERT INTO sales (sale, expense) VALUES (?)"
+    const values= [
+        req.body.sale,
+        req.body.expense
+    ]
+    con.query(sql, [values], (err, result) => {
+        if (err) return res.json({Status: false, Error: "You Already Entered Todays's Record!"})
         return res.json({Status: true})
     })
 })
