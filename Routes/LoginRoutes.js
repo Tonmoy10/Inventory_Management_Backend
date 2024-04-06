@@ -89,11 +89,12 @@ router.post('/add_item', (req, res) => {
     if(req.body.item_name == "" || req.body.stock == "" || req.body.unit == ""){
         return res.json({Status: false, Error: "Please fill out all the fields!"})
     }
-    const sql = 'INSERT into items (item_name, stock, unit) values (?)'
+    const sql = 'INSERT into items (item_name, stock, unit, minimum) values (?)'
     const values = [
         req.body.item_name,
         req.body.stock,
-        req.body.unit
+        req.body.unit,
+        req.body.minimum
     ]
     con.query(sql, [values], (err, result) => {
         if (err) return res.json({ Status: false, Error: "Query Error!" })
@@ -181,7 +182,7 @@ router.get('/salary_count', (req, res) => {
     })
 })
 
-router.get('/logout', (req, res) => {
+router.post('/logout', (req, res) => {
     res.clearCookie('token')
     return res.json({ Status: true })
 })
