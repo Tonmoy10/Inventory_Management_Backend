@@ -20,8 +20,33 @@ router.post('/login', (req, res) => {
 })
 
 router.post('/add_employee', (req, res) => {
-    if(req.body.name == "" || req.body.position == "" || req.body.salary == "" || req.body.phone == "" || req.body.address == "" || req.body.join_date == ""){
+    if(req.body.name == "" ||
+    req.body.position == "" ||
+    req.body.salary == "" ||
+    req.body.phone == "" ||
+    req.body.nid == "" ||
+    req.body.address == "" ||
+    req.body.join_date == ""){
         return res.json({Status: false, Error: "Please fill out all the fields!"})
+    }
+
+    if (/[^\w\s]/.test(req.body.name) || /[^\w\s]/.test(req.body.position)) {
+        return res.json({ Status: false, Error: "Name and Position cannot contain symbols!" });
+    }
+
+    if (!/^\d+$/.test(req.body.salary) || !/^\d+$/.test(req.body.phone) || !/^\d+$/.test(req.body.nid)) {
+        return res.json({ Status: false, Error: "Salary, Phone, and NID number must contain numbers only!" });
+    }
+
+    const joinDate = new Date(req.body.join_date);
+    const today = new Date();
+
+    if(joinDate > today) {
+        return res.json({Status: false, Error: "Join date cannot be in the future!"});
+    }
+
+    if (!/^01/.test(req.body.phone)) {
+        return res.json({ Status: false, Error: "Phone number must start with '01'!" });
     }
     const sql = 'INSERT INTO employees (name, position, salary, phone, nid, address, join_date) VALUES (?)';
     const values = [
@@ -86,8 +111,16 @@ router.get('/item', (req, res) => {
 })
 
 router.post('/add_item', (req, res) => {
-    if(req.body.item_name == "" || req.body.stock == "" || req.body.unit == ""){
+    if(req.body.item_name == "" || req.body.stock == "" || req.body.unit == "" || req.body.minimum == ""){
         return res.json({Status: false, Error: "Please fill out all the fields!"})
+    }
+
+    if (/[^\w\s]/.test(req.body.item_name) || /[^\w\s]/.test(req.body.unit)) {
+        return res.json({ Status: false, Error: "Name and Unit cannot contain symbols!" });
+    }
+
+    if (!/^\d+$/.test(req.body.stock) || !/^\d+$/.test(req.body.minimum)) {
+        return res.json({ Status: false, Error: "Stock and Minimum Quantity must contain numbers only!" });
     }
     const sql = 'INSERT into items (item_name, stock, unit, minimum) values (?)'
     const values = [
